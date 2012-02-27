@@ -4,6 +4,7 @@ OBJECTS	= $(subst .c,.o,$(wildcard *.c))
 TARGET	= aliasing
 
 $(TARGET): $(OBJECTS)
+	$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
 
 clean:
 	-rm -f $(TARGET) *.o *~ core

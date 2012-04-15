@@ -304,7 +304,7 @@ void init(void)
   glFogf(GL_FOG_DENSITY, 0.5);
   glFogfv(GL_FOG_COLOR, fogcolor);
   glFogf(GL_FOG_START, 2.0);
-  glFogf(GL_FOG_END, 15.0);
+  glFogf(GL_FOG_END, 12.0);
 
   /* アンチエリアシングの設定 */
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);

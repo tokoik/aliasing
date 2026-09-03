@@ -1,332 +1,664 @@
-#include <math.h>
+ï»¿#include <math.h>
+
 #include "aliasing.h"
+
 #include "menu.h"
+
+
 
 #define PI 3.14159265358979323846
 
-/* ƒ{ƒ^ƒ“‚Ìó‘Ô */
+
+
+/* ãƒœã‚¿ãƒ³ã®çŠ¶æ…‹ */
+
 static int pbutton, pstate;
 
-/* ƒhƒ‰ƒbƒOŠJnˆÊ’u */
+
+
+/* ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹ä½ç½® */
+
 static int cx, cy;
 
-/* ƒ}ƒEƒX‚Ìâ‘ÎˆÊ’u¨ƒEƒBƒ“ƒhƒE“à‚Å‚Ì‘Š‘ÎˆÊ’u‚ÌŠ·ZŒW” */
+
+
+/* ãƒã‚¦ã‚¹ã®çµ¶å¯¾ä½ç½®â†’ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å†…ã§ã®ç›¸å¯¾ä½ç½®ã®æ›ç®—ä¿‚æ•° */
+
 static double sx, sy;
 
-/* ‰ñ“]‚Ì‰Šú’l (ƒNƒH[ƒ^ƒjƒIƒ“) */
+
+
+/* å›è»¢ã®åˆæœŸå€¤ (ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³) */
+
 static double cq[4] = { 1.0, 0.0, 0.0, 0.0 };
 
-/* ƒhƒ‰ƒbƒO’†‚Ì‰ñ“] (ƒNƒH[ƒ^ƒjƒIƒ“) */
+
+
+/* ãƒ‰ãƒ©ãƒƒã‚°ä¸­ã®å›è»¢ (ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³) */
+
 static double tq[4];
 
-/* ‰ñ“]‚Ì•ÏŠ·s—ñ */
+
+
+/* å›è»¢ã®å¤‰æ›è¡Œåˆ— */
+
 static double rt[16];
 
-/* ƒNƒH[ƒ^ƒjƒIƒ“‚ÌÏ */
+
+
+/* ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã®ç© */
+
 extern void qmul(double [], const double [], const double []);
 
-/* ƒNƒH[ƒ^ƒjƒIƒ“¨‰ñ“]‚Ì•ÏŠ·s—ñ */
+
+
+/* ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³â†’å›è»¢ã®å¤‰æ›è¡Œåˆ— */
+
 extern void qrot(double [], double []);
 
-/* ƒXƒNƒŠ[ƒ“‚ÌƒAƒXƒyƒNƒg”ä */
+
+
+/* ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã®ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯” */
+
 static double aspect;
 
+
+
 void scene(double ox, double oy)
+
 {
-  /* ŒõŒ¹‚ÌˆÊ’u */
+
+  /* å…‰æºã®ä½ç½® */
+
   static GLfloat lightpos[] = { 4.0, 5.0, 6.0, 0.0 };
 
-  /* •¨‘Ì‚ÌF */
+
+
+  /* ç‰©ä½“ã®è‰² */
+
   static GLfloat yellow[] = { 0.8, 0.8, 0.2, 1.0 };
 
-  /* °‚ÌF */
+
+
+  /* åºŠã®è‰² */
+
   static GLfloat ground[][4] = {
+
     { 0.6, 0.6, 0.6, 1.0 },
+
     { 0.3, 0.3, 0.3, 1.0 }
+
   };
+
+
 
   int i, j;
 
-  /* ‰æ–ÊƒNƒŠƒA */
+
+
+  /* ç”»é¢ã‚¯ãƒªã‚¢ */
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  /* “§‹•ÏŠ·s—ñ‚Ìw’è */
+
+
+  /* é€è¦–å¤‰æ›è¡Œåˆ—ã®æŒ‡å®š */
+
   glMatrixMode(GL_PROJECTION);
 
-  /* “§‹•ÏŠ·s—ñ‚Ì‰Šú‰» */
+
+
+  /* é€è¦–å¤‰æ›è¡Œåˆ—ã®åˆæœŸåŒ– */
+
   glLoadIdentity();
 
-  /* •\¦—Ìˆæ‚ğƒTƒuƒsƒNƒZƒ‹’PˆÊ‚É‚¸‚ç‚· */
+
+
+  /* è¡¨ç¤ºé ˜åŸŸã‚’ã‚µãƒ–ãƒ”ã‚¯ã‚»ãƒ«å˜ä½ã«ãšã‚‰ã™ */
+
   glTranslated(ox * sx, oy * sy, 0.0);
 
-  /* ‹–ì‚Ìİ’è */
+
+
+  /* è¦–é‡ã®è¨­å®š */
+
   glFrustum(-0.5, 0.5, -aspect, aspect, 2.0, 20.0);
 
-  /* ƒ‚ƒfƒ‹ƒrƒ…[•ÏŠ·s—ñ‚Ìw’è */
+
+
+  /* ãƒ¢ãƒ‡ãƒ«ãƒ“ãƒ¥ãƒ¼å¤‰æ›è¡Œåˆ—ã®æŒ‡å®š */
+
   glMatrixMode(GL_MODELVIEW);
 
-  /* ƒ‚ƒfƒ‹ƒrƒ…[•ÏŠ·s—ñ‚Ì‰Šú‰» */
+
+
+  /* ãƒ¢ãƒ‡ãƒ«ãƒ“ãƒ¥ãƒ¼å¤‰æ›è¡Œåˆ—ã®åˆæœŸåŒ– */
+
   glLoadIdentity();
 
-  /* ‹“_‚ÌˆÚ“® */
+
+
+  /* è¦–ç‚¹ã®ç§»å‹• */
+
   glTranslated(0.0, 0.0, -10.0);
 
-  /* ‰ñ“] */
+
+
+  /* å›è»¢ */
+
   glMultMatrixd(rt);
 
-  /* ŒõŒ¹‚ÌˆÊ’u‚ğİ’è */
+
+
+  /* å…‰æºã®ä½ç½®ã‚’è¨­å®š */
+
   glLightfv(GL_LIGHT0, GL_POSITION, lightpos);
 
-  /* ° */
+
+
+  /* åºŠ */
+
   glNormal3d(0.0, 1.0, 0.0);
+
   glBegin(GL_QUADS);
+
   for (j = -5; j <= 5; j++) {
+
     for (i = -5; i < 5; i++) {
+
       glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, ground[(i + j) & 1]);
+
       glVertex3d((GLdouble)i, -1.0, (GLdouble)j);
+
       glVertex3d((GLdouble)i, -1.0, (GLdouble)(j + 1));
+
       glVertex3d((GLdouble)(i + 1), -1.0, (GLdouble)(j + 1));
+
       glVertex3d((GLdouble)(i + 1), -1.0, (GLdouble)j);
+
     }
+
   }
+
   glEnd();
 
-  /* ‰©F‚¢ƒeƒB[ƒ|ƒbƒg */
+
+
+  /* é»„è‰²ã„ãƒ†ã‚£ãƒ¼ãƒãƒƒãƒˆ */
+
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, yellow);
+
   if (model)
+
     glutSolidTeapot(1.0);
+
   else
+
     glutWireTeapot(1.0);
 
+
+
   glFlush();
+
 }
+
+
 
 void display(void)
+
 {
+
   if (fog)
+
     glEnable(GL_FOG);
+
   else
+
     glDisable(GL_FOG);
 
+
+
   if (method == 0) {
+
     /*
-    ** ƒAƒ“ƒ`ƒGƒŠƒAƒVƒ“ƒO‚È‚µ
+
+    ** ã‚¢ãƒ³ãƒã‚¨ãƒªã‚¢ã‚·ãƒ³ã‚°ãªã—
+
     */
+
     scene(0.0, 0.0);
+
   } else if (method == 1) {
+
     /*
-    ** OpenGL ©g‚ÌƒAƒ“ƒ`ƒGƒŠƒAƒVƒ“ƒO‹@”\iƒƒCƒ„ƒtƒŒ[ƒ€‚Ì‚İj
+
+    ** OpenGL è‡ªèº«ã®ã‚¢ãƒ³ãƒã‚¨ãƒªã‚¢ã‚·ãƒ³ã‚°æ©Ÿèƒ½ï¼ˆãƒ¯ã‚¤ãƒ¤ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã¿ï¼‰
+
     */
+
     glEnable(GL_LINE_SMOOTH);
+
     glEnable(GL_BLEND);
+
     scene(0.0, 0.0);
+
     glDisable(GL_BLEND);
+
     glDisable(GL_LINE_SMOOTH);
 
+
+
   } else if (2 <= method && method <= 8) {
+
     /*
-    ** ƒOƒŠƒbƒh‚É‰ˆ‚Á‚ÄƒX[ƒp[ƒTƒ“ƒvƒŠƒ“ƒO
+
+    ** ã‚°ãƒªãƒƒãƒ‰ã«æ²¿ã£ã¦ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
+
     */
+
     int i, j, n = method;
+
     double step = 1.0 / (double)n;
+
     
+
     for (j = 0; j < n; j++) {
+
       for (i = 0; i < n; i++) {
+
         scene((double)i * step, (double)j * step);
+
         if (i | j)
+
           glAccum(GL_ACCUM, step * step);
+
         else
+
           glAccum(GL_LOAD, step * step);
+
       }
+
     }
+
     glAccum(GL_RETURN, 1.0);
+
   }
+
   else if (method == 9) {
+
     /*
+
     ** RGSS (Rotated Grid SuperSampling)
+
     */
+
     scene(0.0, 0.25);
+
     glAccum(GL_LOAD, 0.25);
+
     scene(0.5, 0.0);
+
     glAccum(GL_ACCUM, 0.25);
+
     scene(0.75, 0.5);
+
     glAccum(GL_ACCUM, 0.25);
+
     scene(0.25, 0.75);
+
     glAccum(GL_ACCUM, 0.25);
+
     glAccum(GL_RETURN, 1.0);
+
   }
+
   else if (10 <= method && method <= 16) {
+
     /*
-    ** ƒ‰ƒ“ƒ_ƒ€‚ÉƒX[ƒp[ƒTƒ“ƒvƒŠƒ“ƒO
+
+    ** ãƒ©ãƒ³ãƒ€ãƒ ã«ã‚¹ãƒ¼ãƒ‘ãƒ¼ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
+
     */
+
     int i, n = (method - 8) * (method - 8);
+
     double weight = 1.0 / (double)n;
 
+
+
     srand(34761);
+
     glAccum(GL_LOAD, weight);
+
     scene((double)rand() / ((double)RAND_MAX + 1.0),
+
       (double)rand() / ((double)RAND_MAX + 1.0));
+
     for (i = 1; i < n; i++) {
+
       scene((double)rand() / ((double)RAND_MAX + 1.0),
+
         (double)rand() / ((double)RAND_MAX + 1.0));
+
       glAccum(GL_ACCUM, weight); 
+
     }
+
     glAccum(GL_RETURN, 1.0);
+
     /*
-    ** ‚±‚Ì•û–@‚Í‘SƒsƒNƒZƒ‹‚ğ“¯‚¶ƒpƒ^[ƒ“‚ÅƒTƒ“ƒvƒŠƒ“ƒO‚µ‚Ä‚¢‚é‚ªC
-    ** ƒsƒNƒZƒ‹‚²‚Æ‚É“Æ—§‚µ‚Äi—”‚ğ”­¶‚³‚¹‚ÄjƒTƒ“ƒvƒŠƒ“ƒO‚·‚é
-    ** •û‚ªƒGƒŠƒAƒVƒ“ƒO‚ª–Ú—§‚½‚È‚¢i­‚È‚¢ƒTƒ“ƒvƒŠƒ“ƒO”‚ÅÏ‚ŞjD
+
+    ** ã“ã®æ–¹æ³•ã¯å…¨ãƒ”ã‚¯ã‚»ãƒ«ã‚’åŒã˜ãƒ‘ã‚¿ãƒ¼ãƒ³ã§ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã—ã¦ã„ã‚‹ãŒï¼Œ
+
+    ** ãƒ”ã‚¯ã‚»ãƒ«ã”ã¨ã«ç‹¬ç«‹ã—ã¦ï¼ˆä¹±æ•°ã‚’ç™ºç”Ÿã•ã›ã¦ï¼‰ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹
+
+    ** æ–¹ãŒã‚¨ãƒªã‚¢ã‚·ãƒ³ã‚°ãŒç›®ç«‹ãŸãªã„ï¼ˆå°‘ãªã„ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°æ•°ã§æ¸ˆã‚€ï¼‰ï¼
+
     */
+
   }
+
   else if (method == 17) {
+
     /*
+
     ** Quincunx
+
     */
+
     scene(0.0, 0.0);
+
     glAccum(GL_LOAD, 0.5);
+
     scene(-0.5, -0.5);
+
     glAccum(GL_ACCUM, 0.125);
+
     scene( 0.5, -0.5);
+
     glAccum(GL_ACCUM, 0.125);
+
     scene( 0.5, 0.5);
+
     glAccum(GL_ACCUM, 0.125);
+
     scene(-0.5, 0.5);
+
     glAccum(GL_ACCUM, 0.125);
+
     glAccum(GL_RETURN, 1.0);
+
     /*
-    ** ‚±‚Ìè–@‚Í‚Í—×Ú‚·‚éƒsƒNƒZƒ‹‚Ì’l‚ğg‚¤‚Ì‚ÅC–{“–‚È‚ç
-    ** ƒŒƒ“ƒ_ƒŠƒ“ƒO (scene() ‚ÌŒÄ‚Ño‚µ)‚Í‚Q‰ñ‚ÅÏ‚ŞD
+
+    ** ã“ã®æ‰‹æ³•ã¯ã¯éš£æ¥ã™ã‚‹ãƒ”ã‚¯ã‚»ãƒ«ã®å€¤ã‚’ä½¿ã†ã®ã§ï¼Œæœ¬å½“ãªã‚‰
+
+    ** ãƒ¬ãƒ³ãƒ€ãƒªãƒ³ã‚° (scene() ã®å‘¼ã³å‡ºã—)ã¯ï¼’å›ã§æ¸ˆã‚€ï¼
+
     */
+
   }
+
   glutSwapBuffers();
+
 }
+
+
 
 void idle(void)
+
 {
+
   glutPostRedisplay();
+
 }
+
+
 
 void mouse(int button, int state, int x, int y)
+
 {
-  /* ƒ{ƒ^ƒ“‚Ìó‘Ô‚ğ‹L˜^ */
+
+  /* ãƒœã‚¿ãƒ³ã®çŠ¶æ…‹ã‚’è¨˜éŒ² */
+
   pbutton = button;
+
   pstate = state;
 
+
+
   switch (button) {
+
   case GLUT_LEFT_BUTTON:
+
     switch (state) {
+
     case GLUT_DOWN:
-      /* ƒhƒ‰ƒbƒOŠJn“_‚ğ‹L˜^ */
+
+      /* ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹ç‚¹ã‚’è¨˜éŒ² */
+
       cx = x;
+
       cy = y;
-      /* ƒAƒjƒ[ƒVƒ‡ƒ“ŠJn */
+
+      /* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é–‹å§‹ */
+
       glutIdleFunc(idle);
+
       break;
+
     case GLUT_UP:
-      /* ƒAƒjƒ[ƒVƒ‡ƒ“I—¹ */
+
+      /* ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³çµ‚äº† */
+
       glutIdleFunc(0);
-      /* ‰ñ“]‚Ì•Û‘¶ */
+
+      /* å›è»¢ã®ä¿å­˜ */
+
       cq[0] = tq[0];
+
       cq[1] = tq[1];
+
       cq[2] = tq[2];
+
       cq[3] = tq[3];
+
       break;
+
     default:
+
       break;
+
     }
+
     break;
+
   default:
+
     break;
+
   }
+
 }
+
+
 
 void motion(int x, int y)
+
 {
+
   if (pbutton == GLUT_LEFT_BUTTON) {
+
     double dx, dy, a;
+
     
-    /* ƒ}ƒEƒXƒ|ƒCƒ“ƒ^‚ÌˆÊ’u‚Ìƒhƒ‰ƒbƒOŠJnˆÊ’u‚©‚ç‚Ì•ÏˆÊ */
+
+    /* ãƒã‚¦ã‚¹ãƒã‚¤ãƒ³ã‚¿ã®ä½ç½®ã®ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹ä½ç½®ã‹ã‚‰ã®å¤‰ä½ */
+
     dx = (x - cx) * sx;
+
     dy = (y - cy) * sy;
+
     
-    /* ƒ}ƒEƒXƒ|ƒCƒ“ƒ^‚ÌˆÊ’u‚Ìƒhƒ‰ƒbƒOŠJnˆÊ’u‚©‚ç‚Ì‹——£ */
+
+    /* ãƒã‚¦ã‚¹ãƒã‚¤ãƒ³ã‚¿ã®ä½ç½®ã®ãƒ‰ãƒ©ãƒƒã‚°é–‹å§‹ä½ç½®ã‹ã‚‰ã®è·é›¢ */
+
     a = sqrt(dx * dx + dy * dy);
+
     
+
     if (a != 0.0) {
+
       double ar = a * PI * 0.5;
+
       double as = sin(ar) / a;
+
       double dq[4] = { cos(ar), dy * as, dx * as, 0.0 };
+
       
-      /* ƒNƒH[ƒ^ƒjƒIƒ“‚ğŠ|‚¯‚Ä‰ñ“]‚ğ‡¬ */
+
+      /* ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‚’æ›ã‘ã¦å›è»¢ã‚’åˆæˆ */
+
       qmul(tq, dq, cq);
-      /* ƒNƒH[ƒ^ƒjƒIƒ“‚©‚ç‰ñ“]‚Ì•ÏŠ·s—ñ‚ğ‹‚ß‚é */
+
+      /* ã‚¯ã‚©ãƒ¼ã‚¿ãƒ‹ã‚ªãƒ³ã‹ã‚‰å›è»¢ã®å¤‰æ›è¡Œåˆ—ã‚’æ±‚ã‚ã‚‹ */
+
       qrot(rt, tq);
+
     }
+
   }
+
 }
+
+
 
 void resize(int w, int h)
+
 {
-  /* •\¦—Ìˆæ‚Ì‚P‰æ‘f‚Ì³‹K‰»ƒfƒoƒCƒXÀ•WŒn‚Å‚Ì‘å‚«‚³ */
+
+  /* è¡¨ç¤ºé ˜åŸŸã®ï¼‘ç”»ç´ ã®æ­£è¦åŒ–ãƒ‡ãƒã‚¤ã‚¹åº§æ¨™ç³»ã§ã®å¤§ãã• */
+
   sx = 2.0 / (double)w;
+
   sy = 2.0 / (double)h;
 
-  /* ƒXƒNƒŠ[ƒ“‚ÌƒAƒXƒyƒNƒg”ä‚Ì‚Q•ª‚Ì‚P */
+
+
+  /* ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã®ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”ã®ï¼’åˆ†ã®ï¼‘ */
+
   aspect = 0.5 * (double)h / (double)w;
 
-  /* ƒEƒBƒ“ƒhƒE‘S‘Ì‚ğƒrƒ…[ƒ|[ƒg‚É‚·‚é */
+
+
+  /* ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å…¨ä½“ã‚’ãƒ“ãƒ¥ãƒ¼ãƒãƒ¼ãƒˆã«ã™ã‚‹ */
+
   glViewport(0, 0, w, h);
+
 }
+
+
 
 void keyboard(unsigned char key, int x, int y)
+
 {
-  /* ESC ‚© q ‚ğƒ^ƒCƒv‚µ‚½‚çI—¹ */
+
+  /* ESC ã‹ q ã‚’ã‚¿ã‚¤ãƒ—ã—ãŸã‚‰çµ‚äº† */
+
   if (key == '\033' || key == 'q') {
+
     exit(0);
+
   }
+
 }
+
+
 
 void init(void)
+
 {
+
   float fogcolor[] = { 0.5, 0.5, 0.5, 0.0 };
-  /* ‰Šúİ’è */
+
+  /* åˆæœŸè¨­å®š */
+
   glClearColor(1.0, 1.0, 1.0, 0.0);
+
   glEnable(GL_DEPTH_TEST);
+
   glDisable(GL_CULL_FACE);
+
   glEnable(GL_LIGHTING);
+
   glEnable(GL_LIGHT0);
 
-  /* glAccum() ‚Ìˆ—‘ÎÌ‚Æ‚·‚éƒoƒbƒtƒ@ */
+
+
+  /* glAccum() ã®å‡¦ç†å¯¾ç§°ã¨ã™ã‚‹ãƒãƒƒãƒ•ã‚¡ */
+
   glReadBuffer(GL_BACK);
 
-  /* ƒtƒHƒO‚Ìİ’è */
+
+
+  /* ãƒ•ã‚©ã‚°ã®è¨­å®š */
+
   glFogi(GL_FOG_MODE, GL_LINEAR);
+
   glFogf(GL_FOG_DENSITY, 0.5);
+
   glFogfv(GL_FOG_COLOR, fogcolor);
+
   glFogf(GL_FOG_START, 2.0);
+
   glFogf(GL_FOG_END, 12.0);
 
-  /* ƒAƒ“ƒ`ƒGƒŠƒAƒVƒ“ƒO‚Ìİ’è */
+
+
+  /* ã‚¢ãƒ³ãƒã‚¨ãƒªã‚¢ã‚·ãƒ³ã‚°ã®è¨­å®š */
+
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
   glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  /* ‰ñ“]s—ñ‚Ì‰Šú‰» */
+
+
+  /* å›è»¢è¡Œåˆ—ã®åˆæœŸåŒ– */
+
   qrot(rt, cq);
+
 }
 
+
+
 int main(int argc, char *argv[])
+
 {
+
   glutInit(&argc, argv);
+
   glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_ACCUM);
+
   glutCreateWindow(argv[0]);
+
   glutDisplayFunc(display);
+
   glutReshapeFunc(resize);
+
   glutKeyboardFunc(keyboard);
+
   glutMouseFunc(mouse);
+
   glutMotionFunc(motion);
+
   init();
+
   menu();
+
   glutMainLoop();
+
   return 0;
+
 }
+

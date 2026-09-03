@@ -1,8 +1,16 @@
-extern int method; /* ƒTƒ“ƒvƒŠƒ“ƒO•û–@@@ */
-extern int model;  /* ƒe[ƒ|ƒbƒg‚Ì•\¦•û–@ */
-extern int fog;    /* ƒtƒHƒO‚Ìó‘Ô@@@@ */
+ï»¿extern int method; /* ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°æ–¹æ³•ã€€ã€€ */
+
+extern int model;  /* ãƒ†ãƒ¼ãƒãƒƒãƒˆã®è¡¨ç¤ºæ–¹æ³• */
+
+extern int fog;    /* ãƒ•ã‚©ã‚°ã®çŠ¶æ…‹ã€€ã€€ã€€ã€€ */
+
+
 
 /*
-** ƒƒjƒ…[‚Ìì¬
+
+** ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®ä½œæˆ
+
 */
+
 extern void menu(void);
+

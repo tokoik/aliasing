@@ -5,8 +5,8 @@
 本プログラムは、OpenGL のアキュムレーションバッファ（Accumulation Buffer）を利用して、シーンを微小にずらしながら複数回レンダリングして合成することにより、フルシーン・アンチエイリアシング（FSAA）を実現するサンプルプログラムです。
 
 - 移行元ブログ記事:
-  - [ビデオカード - 床井研究室](https://tokoik.github.io/blog/2004/11/30/)
-  - [GLSL による画像のフィルタ処理 (アンチエイリアシング) - 床井研究室](https://tokoik.github.io/blog/2012/09/04/)
+  - [ビデオカード - 床井研究室](https://tokoik.github.io/blog/2004-11-30.html)
+  - [GLSL による画像のフィルタ処理 (アンチエイリアシング) - 床井研究室](https://tokoik.github.io/blog/2012-09-04.html)
 
 ## 2. 対応環境
 
